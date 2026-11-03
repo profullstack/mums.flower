@@ -149,16 +149,23 @@ export async function addMom(userId: string, input: Record<string, unknown>): Pr
 }
 
 export async function updateMom(userId: string, id: string, input: Record<string, unknown>): Promise<Mom> {
-  await getMom(userId, id);
+  const cur = await getMom(userId, id);
+  // Validate only what was sent, merge over the current row, and write every column with one
+  // constant statement (no SQL assembled from field names).
   const f = momFields(input, true);
-  const cols = Object.keys(f);
-  if (cols.length) {
-    await run(`update moms set ${cols.map((c) => `${c} = ?`).join(', ')} where id = ? and user_id = ?`, [
-      ...cols.map((c) => f[c] as string | null),
-      id,
-      userId,
-    ]);
-  }
+  const v = {
+    name: 'name' in f ? (f.name as string) : cur.name,
+    relationship: 'relationship' in f ? (f.relationship as string) : cur.relationship,
+    birthday: 'birthday' in f ? (f.birthday as string | null) : cur.birthday,
+    country: 'country' in f ? (f.country as string) : cur.country,
+    favorite_flowers: 'favorite_flowers' in f ? (f.favorite_flowers as string) : JSON.stringify(cur.favoriteFlowers),
+    email: 'email' in f ? (f.email as string | null) : cur.email,
+    notes: 'notes' in f ? (f.notes as string | null) : cur.notes,
+  };
+  await run(
+    'update moms set name = ?, relationship = ?, birthday = ?, country = ?, favorite_flowers = ?, email = ?, notes = ? where id = ? and user_id = ?',
+    [v.name, v.relationship, v.birthday, v.country, v.favorite_flowers, v.email, v.notes, id, userId],
+  );
   return getMom(userId, id);
 }
 
