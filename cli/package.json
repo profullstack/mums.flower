@@ -1,0 +1,22 @@
+{
+  "name": "mums.flower",
+  "version": "0.1.0",
+  "description": "mums.flower CLI and MCP bridge: remember mom's birthday and Mother's Day, flower meanings, and bouquet cards.",
+  "type": "module",
+  "bin": {
+    "mums": "mums.mjs",
+    "mums.flower": "mums.mjs"
+  },
+  "files": ["mums.mjs", "README.md"],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": ["mothers-day", "flowers", "mcp", "cli", "reminders"],
+  "homepage": "https://mums.flower.pit.world/docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/profullstack/mums.flower.git",
+    "directory": "cli"
+  },
+  "license": "MIT"
+}

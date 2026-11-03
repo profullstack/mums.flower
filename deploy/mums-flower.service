@@ -1,0 +1,19 @@
+# /etc/systemd/system/mums-flower.service on dev3 (no system node there, so a pinned container).
+# Code is read-only; only /data (the libSQL file) is writable. Secrets: /etc/mums-flower.env (root 600).
+[Unit]
+Description=mums.flower (flowers for moms)
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f mums-flower
+ExecStart=/usr/bin/docker run --rm --name mums-flower --network host --read-only --tmpfs /tmp \
+  --user 65534:65534 --memory 256m --env-file /etc/mums-flower.env \
+  -e PORT=8811 -e HOST=127.0.0.1 -e NODE_ENV=production -e MUMS_DB_URL=file:/data/mums.db \
+  -v /opt/mums.flower:/app:ro -v /var/lib/mums.flower:/data -w /app node:24-alpine node src/server.ts
+ExecStop=/usr/bin/docker stop -t 5 mums-flower
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
